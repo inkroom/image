@@ -2,13 +2,9 @@
 
 ### 网站地址
 
-[墨盒相册](http://image.inkroom.cn/album/1/)
+[墨盒相册](http://image.inkroom.cn/)
 
 
----- 
-更多图片请访问[墨盒的图片站](http://image.inkroom.cn/album/1/) ————2019年7月份后将不可访问
-
-或者[github纯静态网站](https://inkroom.github.io/image-pages/index.html)
 
 =======
 ----- 

@@ -1,7 +1,7 @@
 [
-{
-	"name":"GOSICK",
-		"cover":"GOSICK04.jpg"
+	{
+		"name":"千反田爱榴",
+		"cover":"千反田爱榴04.jpg"
 	},
 	{
 		"name":"k",
@@ -9,11 +9,11 @@
 	},
 	{
 		"name":"p",
-		"cover":"74626522_p0.jpg"
+		"cover":"71712113_p0.jpg"
 	},
 	{
-		"name":"rewrite",
-		"cover":"rewrite31.jpg"
+		"name":"从零开始的异世界生活",
+		"cover":"从零开始的异世界生活74.jpg"
 	},
 	{
 		"name":"二次元",
@@ -24,8 +24,12 @@
 		"cover":"丹特丽安的书架15.jpg"
 	},
 	{
-		"name":"从零开始的异世界生活",
-		"cover":"从零开始的异世界生活74.jpg"
+		"name":"rewrite",
+		"cover":"rewrite31.jpg"
+	},
+	{
+		"name":"妖精的尾巴",
+		"cover":"妖精的尾巴01.jpg"
 	},
 	{
 		"name":"刀剑神域",
@@ -67,9 +71,10 @@
 		"cover":"魔法禁书目录2.jpg"
 	},
 	{
-		"name":"千反田爱榴",
-		"cover":"千反田爱榴04.jpg"
+	"name":"GOSICK",
+		"cover":"GOSICK04.jpg"
 	},
+	
 	{
 		"name":"秦时明月",
 		"cover":"秦时明月025.jpg"
@@ -79,9 +84,6 @@
 	},{
 		"name":"雪乃雪之下",
 		"cover":"雪乃雪之下5.jpg"
-	},{
-		"name":"妖精的尾巴",
-		"cover":"妖精的尾巴01.jpg"
 	},
 	{
 		"name":"缘之空",

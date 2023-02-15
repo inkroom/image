@@ -8,7 +8,7 @@ on:
   push:
     branches: [ "master" ]
     paths-ignore:
-      - '.github/workflows/*.yml'
+      - '.github/workflows/*'
       - 'config.json'
       - 'README.md'
       - 'list/**'

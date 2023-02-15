@@ -74,7 +74,7 @@ jobs:
         #   git push
         uses: actions-x/commit@v6
         with:
-          email: github_temp@inkroom.cn
+          email: enpassPixiv@protonmail.com
           name: Action Robot
           message: "Update List By Action Robot"
           branch: master

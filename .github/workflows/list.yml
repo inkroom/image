@@ -1,5 +1,3 @@
-# This is a basic workflow to help you get started with Actions
-
 name: list
 
 # Controls when the workflow will run
@@ -8,7 +6,7 @@ on:
   push:
     branches: [ "master" ]
     paths-ignore:
-      - '.github/workflows/*'
+      - '.github/**'
       - 'config.json'
       - 'README.md'
       - 'list/**'
@@ -37,24 +35,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 1  # OR "2" -> To retrieve the preceding commit.
+          # We need to fetch all branches and commits so that Nx affected has a base to compare against.
+          fetch-depth: 0
+      # - name: Last Success SHA
+      #   uses: nrwl/nx-set-shas@v3
+      #   id: sha
+      #   with:
+      #     main-branch-name: "master"
+      - name: Last Success SHA
+        id: get-base-sha
+        run: |
+          echo "base_sha=$(cat .github/.sha)" >> $GITHUB_OUTPUT
+
       - name: List files
         id: changed-files
         uses: tj-actions/changed-files@v35
         with:
-          # base_sha: ${{ steps.sha.outputs.content }}
-          fetch_depth: 1
+          base_sha: ${{ steps.get-base-sha.outputs.base_sha }}
+          # fetch_depth: 1
           quotepath: "false"
           include_all_old_new_renamed_files: true
+          write_output_files: true
+          separator: "______"
+          old_new_files_separator: "______"
           files_ignore: |
             config.json
             README.md
             .github/**
       - name: Echo files
         run: |
-          echo ${{ steps.changed-files.outputs.added_files }} >> add.list
-          echo ${{ steps.changed-files.outputs.all_old_new_renamed_files }} >> rename.list
-          echo ${{ steps.changed-files.outputs.deleted_files }} >> delete.list
+          cp .github/outputs/added_files.txt add.list
+          cp .github/outputs/all_old_new_renamed_files.txt rename.list
+          cp .github/outputs/deleted_files.txt delete.list
       - name: Update
         env:
           CSRF: ${{ secrets.CSRF }}
@@ -63,19 +75,24 @@ jobs:
           cd .github/workflows
           npm i axios
           node list.js
+          cd ../
+          echo $GITHUB_SHA > .sha
       - name: Push
-        # run: |
-        #   git status
-        #   rm -rf rename.list add.list delete.list .github/workflows/node_modules/ .github/workflows/package-lock.json .github/workflows/package.json
-        #   git config user.email "github_temp@inkroom.cn"
-        #   git config user.name "Action Robot"
-        #   git add list
-        #   git commit -m "update list"
-        #   git push
-        uses: actions-x/commit@v6
-        with:
-          email: enpassPixiv@protonmail.com
-          name: Action Robot
-          message: "Update List By Action Robot"
-          branch: master
-          files: list
+        run: |
+            rm -rf rename.list add.list delete.list .github/workflows/node_modules/ .github/workflows/package-lock.json .github/workflows/package.json
+            if [ -n "$(git status -s list)" ];then
+              git status
+              git config user.email "enpassPixiv@protonmail.com"
+              git config user.name "Action Robot"
+              git add list .github/.sha
+              git commit -m "Update List By Action Robot"
+              git push
+            fi
+          
+        # uses: actions-x/commit@v6
+        # with:
+        #   email: github_temp@inkroom.cn
+        #   name: Action Robot
+        #   message: "Update List By Action Robot"
+        #   branch: master
+        #   files: list

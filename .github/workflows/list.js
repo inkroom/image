@@ -6,18 +6,19 @@ let path = '../../'
 
 let list = {}// 不同文件夹的list文件数据
 
+let req = [];// 要发送的http请求
 
 function getListData(dir) {
     if (list[dir]) return list[dir];
-    if(!fs.existsSync(`${path}list/${dir}.list`)){
-        return list[dir]=[];
+    if (!fs.existsSync(`${path}list/${dir}.list`)) {
+        return list[dir] = [];
     }
     list[dir] = fs.readFileSync(`${path}list/${dir}.list`, { encoding: 'utf-8' }).toString().split('\n')
-    for(var i = list[dir].length - 1;i>=0 ;i--){
-        if(list[dir][i]=='')
+    for (var i = list[dir].length - 1; i >= 0; i--) {
+        if (list[dir][i] == '')
             list[dir].splice(i, 1);
     }
-    
+
     return list[dir];
 
 }
@@ -29,8 +30,6 @@ function getDir(filename) {
 
 function uplodaToBili(filepath) {
 
-    child_process.execSync('sleep 10');// 睡眠10秒，避免封杀
-   
     const form = new FormData();
     form.append('binary', fs.createReadStream(filepath));//图片文件的key
     // form.append('biz', 'new_dyn');
@@ -54,97 +53,102 @@ function uplodaToBili(filepath) {
 if (fs.existsSync(path + 'add.list')) {
     let addFiles = fs.readFileSync(path + 'add.list', { encoding: 'utf-8' }).split('______');
 
-    console.log('addFiles',addFiles);
+    console.log('addFiles', addFiles);
+
+
     for (var i = 0; i < addFiles.length; i++) {
-        if(addFiles[i]=='')continue;
+        if (addFiles[i] == '') continue;
         var temp = {
             data: addFiles[i],
+
+            upload: function (file) {
+                console.log('上传文件 '+file);
+                return uplodaToBili(file)
+                    .then(res => {
+                        if (res.data && res.data.url) {
+                            console.log(new Date() + '上传成功 ' + this.data, res.data);
+                            var listPath = `${path}list/${getDir(this.data)}.list`;
+                            // 上传成功，往list头部追加数据
+                            this.writeFile(`${this.data.substring(this.data.lastIndexOf('/') + 1)}-{"success":true,"result":["${res.data.url.replace('http://', 'https://')}"]}`);
+                        } else {
+                            console.log(res);
+                            process.exit(127);
+                        }
+                    });
+            },
+            writeFile: function (value) {
+                var listPath = `${path}list/${getDir(this.data)}.list`;
+                let d = getListData(getDir(this.data));
+                d.unshift(value);
+                // 写入文件
+                fs.writeFileSync(listPath, d.join('\n').toString(), { encoding: 'utf-8' });
+            },
+
             exec: function () {
-                    // 上传文件
-                    uplodaToBili(`${path}${this.data}`)
-                        .then(res => {
-                            if (res.data && res.data.url) {
-                                console.log('上传成功 ' + this.data,res.data);
-                                var listPath = `${path}list/${getDir(this.data)}.list`;
-                                // 上传成功，往list头部追加数据
-                                let d = getListData(getDir(this.data));
-                                d.unshift(`${this.data.substring(this.data.lastIndexOf('/') + 1)}-{"success":true,"result":["${res.data.url.replace('http://', 'https://')}"]}`)
-                                // 写入文件
-                                fs.writeFileSync(listPath, d.join('\n').toString(), { encoding: 'utf-8' });
-                            } else {
-                                console.log(res);
-                                process.exit(127);
-                            }
-                        }).catch(e => {
-                            if(e.response.status==413){//文件过大，只写入文件名即可
+                console.log('开始上传了 ' + this.data + "   "+new Date())
+                return this.upload(`${path}${this.data}`).catch(e => {
+                    console.log("上传出错 ",e);
+                    if (e.response.status == 413) {//文件过大，只写入文件名即可
 
-                                // 尝试压缩后再次上传
-                                child_process.execSync(`mkdir -p "tmp/${getDir(this.data)}" && ffmpeg -i ${path}${this.data}  -quality 80 tmp/${this.data.replace('png','jpg')}`);
+                        // 尝试压缩后再次上传
+                        child_process.execSync(`mkdir -p "tmp/${getDir(this.data)}" && ffmpeg -i ${path}${this.data}  -quality 80 tmp/${this.data.replace('png', 'jpg')}`);
 
-                                if(fs.existsSync(`tmp/${this.data.replace('png','jpg')}`)){
-                                    uplodaToBili(`tmp/${this.data.replace('png','jpg')}`).then(res=>{
-                                        if (res.data && res.data.url) {
-                                            console.log('压缩后上传成功 ' + this.data,res.data);
-                                            var listPath = `${path}list/${getDir(this.data)}.list`;
-                                            // 上传成功，往list头部追加数据
-                                            let d = getListData(getDir(this.data));
-                                            d.unshift(`${this.data.substring(this.data.lastIndexOf('/') + 1)}-{"success":true,"result":["${res.data.url.replace('http://', 'https://')}"]}`)
-                                            // 写入文件
-                                            fs.writeFileSync(listPath, d.join('\n').toString(), { encoding: 'utf-8' });
-                                        } else {
-                                            console.log(res);
-                                            process.exit(127);
-                                        }
-                                    })
-                                    .catch(e=>{
-                                        if(e.response.status == 413){
-                                            let d = getListData(getDir(this.data));
-                                            d.unshift(`${this.data.substring(this.data.lastIndexOf('/') + 1)}`)
-                                            // 写入文件
-                                            fs.writeFileSync(listPath, d.join('\n').toString(), { encoding: 'utf-8' });
-                                        }else{
-                                            console.log(e);
-                                            process.exit(127);
-                                        }
-                                    })
-
-                                }else{//可能压缩失败
-                                    let d = getListData(getDir(this.data));
-                                    d.unshift(`${this.data.substring(this.data.lastIndexOf('/') + 1)}`)
-                                    // 写入文件
-                                    fs.writeFileSync(listPath, d.join('\n').toString(), { encoding: 'utf-8' });
+                        if (fs.existsSync(`tmp/${this.data.replace('png', 'jpg')}`)) {
+                            this.upload(`tmp/${this.data.replace('png', 'jpg')}`).catch(ex => {
+                                if (ex.response.status == 413) {
+                                    console.log(`压缩后仍不能上传 ${path}${this.data} ${fs.statSync(path+this.data).size} ${fs.statSync('tmp/'+this.data.replace('png', 'jpg')).size}`)
+                                    this.writeFile(`${this.data.substring(this.data.lastIndexOf('/') + 1)}`);
+                                } else {
+                                    console.log(ex);
+                                    process.exit(127);
                                 }
+                            })
+                        } else {//可能压缩失败
+                            this.writeFile(`${this.data.substring(this.data.lastIndexOf('/') + 1)}`);
+                        }
 
-                            }else{
-                                console.log(e);
-                                process.exit(127);
-                            }
+                    } else {
+                        console.log(e);
+                        process.exit(127);
+                    }
+                })
 
-                        });
             }
         }
-        temp.exec();
-
-
-
+        req.push(temp);
     }
 
-}else{
+
+    function nextUpload() {
+        return req[0].exec().then(res => {
+            req.splice(0, 1);
+            if (req.length > 0)
+                setTimeout(nextUpload, 10000);
+        }).catch(e=>{
+            console.log(e);
+            process.exit(127);
+        });
+    }
+
+    nextUpload();
+
+
+} else {
     console.log('没有文件 被 添加');
 }
 
 if (fs.existsSync(path + 'rename.list')) {
     let renameFiles = fs.readFileSync(path + 'rename.list', { encoding: 'utf-8' }).split('______');
-    console.log('rename files ',renameFiles);
+    console.log('rename files ', renameFiles);
 
-    for (var i = 0; i < renameFiles.length ; i++) {
-        if(renameFiles[i]=='')continue;
+    for (var i = 0; i < renameFiles.length; i++) {
+        if (renameFiles[i] == '') continue;
 
         var f = renameFiles[i];
 
         var fss = f.split(',');// 前面是旧名字，后面是新名字
 
- 
+
         // 获取文件夹
         var dir = getDir(fss[0]);
 
@@ -153,10 +157,6 @@ if (fs.existsSync(path + 'rename.list')) {
         var listPath = `${path}list/${dir}.list`;
 
         var d = getListData(dir);
-
-        console.log('list数据 ',d);
-        console.log('dir',dir);
-        console.log('fss ', fss[0].replace(`${dir}/`, ''));
 
         var index = d.findIndex(e => e.startsWith(fss[0].replace(`${dir}/`, '')));
         if (index != -1) {
@@ -170,7 +170,7 @@ if (fs.existsSync(path + 'rename.list')) {
 
     }
 
-}else{
+} else {
     console.log('没有文件 被 重命名');
 }
 
@@ -178,7 +178,7 @@ if (fs.existsSync(path + 'delete.list')) {
     let deleteFiles = fs.readFileSync(path + 'delete.list', { encoding: 'utf-8' }).split('______');
 
     for (var i = 0; i < deleteFiles.length; i++) {
-        if(deleteFiles[i]=='')continue;
+        if (deleteFiles[i] == '') continue;
 
         let dir = getDir(deleteFiles[i]);
         let d = getListData(dir);
@@ -193,6 +193,6 @@ if (fs.existsSync(path + 'delete.list')) {
 
     }
 
-}else{
+} else {
     console.log('没有文件 被 删除');
 }

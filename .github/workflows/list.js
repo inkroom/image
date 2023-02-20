@@ -29,6 +29,7 @@ function getDir(filename) {
 
 function uplodaToBili(filepath) {
 
+    child_process.execSync('sleep 10');// 睡眠10秒，避免封杀
    
     const form = new FormData();
     form.append('binary', fs.createReadStream(filepath));//图片文件的key
@@ -59,12 +60,11 @@ if (fs.existsSync(path + 'add.list')) {
         var temp = {
             data: addFiles[i],
             exec: function () {
-                setTimeout(() => {
                     // 上传文件
                     uplodaToBili(`${path}${this.data}`)
                         .then(res => {
                             if (res.data && res.data.url) {
-                                console.log('上传成功 ' + this.data);
+                                console.log('上传成功 ' + this.data,res.data);
                                 var listPath = `${path}list/${getDir(this.data)}.list`;
                                 // 上传成功，往list头部追加数据
                                 let d = getListData(getDir(this.data));
@@ -84,7 +84,7 @@ if (fs.existsSync(path + 'add.list')) {
                                 if(fs.existsSync(`tmp/${this.data.replace('png','jpg')}`)){
                                     uplodaToBili(`tmp/${this.data.replace('png','jpg')}`).then(res=>{
                                         if (res.data && res.data.url) {
-                                            console.log('压缩后上传成功 ' + this.data);
+                                            console.log('压缩后上传成功 ' + this.data,res.data);
                                             var listPath = `${path}list/${getDir(this.data)}.list`;
                                             // 上传成功，往list头部追加数据
                                             let d = getListData(getDir(this.data));
@@ -120,9 +120,7 @@ if (fs.existsSync(path + 'add.list')) {
                                 process.exit(127);
                             }
 
-                        })
-                        ;
-                }, 5000);// 暂停5秒，避免封杀
+                        });
             }
         }
         temp.exec();

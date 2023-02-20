@@ -1,6 +1,7 @@
 const fs = require('fs');
 const FormData = require('form-data');
 const axios = require('axios');
+const child_process = require('child_process');
 let path = '../../'
 
 let list = {}// 不同文件夹的list文件数据
@@ -76,10 +77,44 @@ if (fs.existsSync(path + 'add.list')) {
                             }
                         }).catch(e => {
                             if(e.response.status==413){//文件过大，只写入文件名即可
-                                let d = getListData(getDir(this.data));
-                                d.unshift(`${this.data.substring(this.data.lastIndexOf('/') + 1)}`)
-                                // 写入文件
-                                fs.writeFileSync(listPath, d.join('\n').toString(), { encoding: 'utf-8' });
+
+                                // 尝试压缩后再次上传
+                                child_process.execSync(`mkdir -p "tmp/${getDir(this.data)}" && ffmpeg -i ${path}${this.data}  -quality 80 tmp/${this.data.replace('png','jpg')}`);
+
+                                if(fs.existsSync(`tmp/${this.data.replace('png','jpg')}`)){
+                                    uplodaToBili(`tmp/${this.data.replace('png','jpg')}`).then(res=>{
+                                        if (res.data && res.data.url) {
+                                            console.log('压缩后上传成功 ' + this.data);
+                                            var listPath = `${path}list/${getDir(this.data)}.list`;
+                                            // 上传成功，往list头部追加数据
+                                            let d = getListData(getDir(this.data));
+                                            d.unshift(`${this.data.substring(this.data.lastIndexOf('/') + 1)}-{"success":true,"result":["${res.data.url.replace('http://', 'https://')}"]}`)
+                                            // 写入文件
+                                            fs.writeFileSync(listPath, d.join('\n').toString(), { encoding: 'utf-8' });
+                                        } else {
+                                            console.log(res);
+                                            process.exit(127);
+                                        }
+                                    })
+                                    .catch(e=>{
+                                        if(e.response.status == 413){
+                                            let d = getListData(getDir(this.data));
+                                            d.unshift(`${this.data.substring(this.data.lastIndexOf('/') + 1)}`)
+                                            // 写入文件
+                                            fs.writeFileSync(listPath, d.join('\n').toString(), { encoding: 'utf-8' });
+                                        }else{
+                                            console.log(e);
+                                            process.exit(127);
+                                        }
+                                    })
+
+                                }else{//可能压缩失败
+                                    let d = getListData(getDir(this.data));
+                                    d.unshift(`${this.data.substring(this.data.lastIndexOf('/') + 1)}`)
+                                    // 写入文件
+                                    fs.writeFileSync(listPath, d.join('\n').toString(), { encoding: 'utf-8' });
+                                }
+
                             }else{
                                 console.log(e);
                                 process.exit(127);

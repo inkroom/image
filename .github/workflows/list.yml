@@ -74,9 +74,8 @@ jobs:
         run: |
           cd .github/workflows
           npm i axios
-          node list.js
-          cd ../
-          echo $GITHUB_SHA > .sha
+          sudo apt install -y ffmpeg
+          node list.js && echo $GITHUB_SHA > ../.sha
       - name: Push
         run: |
             rm -rf rename.list add.list delete.list .github/workflows/node_modules/ .github/workflows/package-lock.json .github/workflows/package.json

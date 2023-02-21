@@ -1,0 +1,50 @@
+name: list
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  list:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Encoding
+        run: |
+          git config --global i18n.logoutputencoding utf-8
+          git config --global i18n.commitencoding utf-8
+          git config --global core.quotepath false
+          export LESSCHARSET=utf-8
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          # We need to fetch all branches and commits so that Nx affected has a base to compare against.
+          fetch-depth: 0
+      # - name: Last Success SHA
+      #   uses: nrwl/nx-set-shas@v3
+      #   id: sha
+      #   with:
+      #     main-branch-name: "master"
+      - name: Clean
+        run: |
+          git checkout --orphan clean
+          rm .github/workflows/clean.yml
+          git add -A
+          git commit -m "clean"
+          echo $(git show -s --format=%H) > .github/.sha
+          git add .github/.sha
+          git commit -m "reset sha"
+          git branch -m master
+          git push -f origin master

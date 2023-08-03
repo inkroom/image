@@ -57,6 +57,7 @@ jobs:
           write_output_files: true
           separator: "______"
           old_new_files_separator: "______"
+          include_all_old_new_renamed_files: true
           files_ignore: |
             config.json
             README.md

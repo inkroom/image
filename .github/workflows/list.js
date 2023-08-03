@@ -151,16 +151,26 @@ if (fs.existsSync(path + 'rename.list')) {
 
         // 获取文件夹
         var dir = getDir(fss[0]);
+        var newDir = getDir(fss[1]);
 
 
         // 读取对应的list文件
         var listPath = `${path}list/${dir}.list`;
-
+        var nlistPath = `${path}list/${newDir}.list`;
         var d = getListData(dir);
+        var nd = getListData(newDir);
+
 
         var index = d.findIndex(e => e.startsWith(fss[0].replace(`${dir}/`, '')));
         if (index != -1) {
-            d[index] = d[index].replace(fss[0].replace(`${dir}/`, ''), fss[1].replace(`${dir}/`, ''));
+            if(dir==newDir){// 相同目录，替换
+                d[index] = d[index].replace(fss[0].replace(`${dir}/`, ''), fss[1].replace(`${dir}/`, ''));
+            }else{// 不同目录删除，再往新目录头部追加
+                nd.unshift(d[index].replace(fss[0].replace(`${dir}/`, ''), fss[1].replace(`${dir}/`, '')));
+                fs.writeFileSync(nlistPath, nd.join('\n').toString(), { encoding: 'utf-8' });
+                
+                d.splice(index, 1);
+            }
             fs.writeFileSync(listPath, d.join('\n').toString(), { encoding: 'utf-8' });
         } else {
             console.log('不存在对应的 文件 list ' + fss[0] + '  ' + fss[1]);

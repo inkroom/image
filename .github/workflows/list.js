@@ -129,8 +129,8 @@ if (fs.existsSync(path + 'add.list')) {
             process.exit(127);
         });
     }
-
-    nextUpload();
+    if (req.length != 0)
+        nextUpload();
 
 
 } else {

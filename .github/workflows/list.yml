@@ -67,6 +67,7 @@ jobs:
           cp .github/outputs/added_files.txt add.list
           cp .github/outputs/renamed_files.txt rename.list
           cp .github/outputs/deleted_files.txt delete.list
+          ls .github/outputs
       - name: Update
         env:
           CSRF: ${{ secrets.CSRF }}

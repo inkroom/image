@@ -27,8 +27,8 @@ function getDir(filename) {
     return filename.substring(0, filename.lastIndexOf('/'));
 }
 
-
-function uplodaToBili(filepath) {
+// 参考项目 https://github.com/xlzy520/picgo-plugin-bilibili/blob/master/src/index.js
+function uploadToBili(filepath) {
 
     const form = new FormData();
     form.append('file_up', fs.createReadStream(filepath));//图片文件的key
@@ -63,7 +63,7 @@ if (fs.existsSync(path + 'add.list')) {
 
             upload: function (file) {
                 console.log('上传文件 '+file);
-                return uplodaToBili(file)
+                return uploadToBili(file)
                     .then(res => {
                         if (res.data && res.data.image_url) {
                             console.log(new Date() + '上传成功 ' + this.data, res.data);

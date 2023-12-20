@@ -31,14 +31,14 @@ function getDir(filename) {
 function uplodaToBili(filepath) {
 
     const form = new FormData();
-    form.append('binary', fs.createReadStream(filepath));//图片文件的key
+    form.append('file_up', fs.createReadStream(filepath));//图片文件的key
     // form.append('biz', 'new_dyn');
     // form.append('category', 'daily');
     form.append('csrf', process.env.CSRF.toString());
-
+    form.append('biz','article');
     return axios.request({
         method: 'POST',
-        url: 'https://api.bilibili.com/x/article/creative/article/upcover',
+        url: 'https://api.bilibili.com/x/dynamic/feed/draw/upload_bfs',
         headers: {
             // contentType: 'multipart/form-data',
             'Cookie': `SESSDATA=${process.env.SESSDATA.toString()}`
@@ -65,11 +65,11 @@ if (fs.existsSync(path + 'add.list')) {
                 console.log('上传文件 '+file);
                 return uplodaToBili(file)
                     .then(res => {
-                        if (res.data && res.data.url) {
+                        if (res.data && res.data.image_url) {
                             console.log(new Date() + '上传成功 ' + this.data, res.data);
                             var listPath = `${path}list/${getDir(this.data)}.list`;
                             // 上传成功，往list头部追加数据
-                            this.writeFile(`${this.data.substring(this.data.lastIndexOf('/') + 1)}-{"success":true,"result":["${res.data.url.replace('http://', 'https://')}"]}`);
+                            this.writeFile(`${this.data.substring(this.data.lastIndexOf('/') + 1)}-{"success":true,"result":["${res.data.image_url.replace('http://', 'https://')}"]}`);
                         } else {
                             console.log(res);
                             process.exit(127);

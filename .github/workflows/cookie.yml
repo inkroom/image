@@ -1,0 +1,27 @@
+name: cookie
+# 用来保持 cookie 有效
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  schedule:
+    - cron: 0 0 1/3 * *
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  cookie:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Cookie
+        env:
+          CSRF: ${{ secrets.CSRF }}
+          SESSDATA: ${{ secrets.SESSDATA }}
+        run: |
+	  curl 'https://api.bilibili.com/x/vip/ads/materials?position=52&position=53&platform=pc&buvid=A3AD99A6-65D9-C8CE-AF4F-FC69BCF19F9447288infoc&mid=310871403' --compressed -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/119.0' -H 'Accept: application/json, text/plain, */*' -H 'Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2' -H 'Accept-Encoding: gzip, deflate, br' -H 'Referer: https://www.bilibili.com/' -H 'Origin: https://www.bilibili.com' -H 'DNT: 1' -H 'Connection: keep-alive' -H "Cookie: SESSDATA=$SESSDATA; bili_jct=$CSRF" -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-site' -H 'TE: trailers'
+

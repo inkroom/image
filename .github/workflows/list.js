@@ -69,7 +69,7 @@ if (fs.existsSync(path + 'add.list')) {
                             console.log(new Date() + '上传成功 ' + this.data, res.data);
                             var listPath = `${path}list/${getDir(this.data)}.list`;
                             // 上传成功，往list头部追加数据
-                            this.writeFile(`${this.data.substring(this.data.lastIndexOf('/') + 1)}-{"success":true,"result":["${res.data.image_url.replace('http://', 'https://')}"]}`);
+                            this.writeFile(`${this.data.substring(this.data.lastIndexOf('/') + 1)}-{"success":true,"result":["${res.data.image_url.replace('http://', 'https://')+'@1e_1c.webp'}"]}`);
                         } else {
                             console.log(res);
                             process.exit(127);

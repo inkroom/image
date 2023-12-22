@@ -73,8 +73,8 @@ jobs:
           SESSDATA: ${{ secrets.SESSDATA }}
         run: |
           cd .github/workflows
-          npm i axios
-          sudo apt install -y ffmpeg
+	# ubuntu 安装ffmpeg又出问题了,干脆换种方式
+          npm i axios ffmpeg-static fluent-ffmpeg
           node list.js && echo $GITHUB_SHA > ../.sha
       - name: Push
         run: |

@@ -2,6 +2,11 @@ const fs = require('fs');
 const FormData = require('form-data');
 const axios = require('axios');
 const child_process = require('child_process');
+const pathToFfmpeg = require('ffmpeg-static')
+const ffmpeg = require('fluent-ffmpeg');
+
+ffmpeg.setFfmpegPath(pathToFfmpeg);
+
 let path = '../../'
 
 let list = {}// 不同文件夹的list文件数据
@@ -89,24 +94,33 @@ if (fs.existsSync(path + 'add.list')) {
                 return this.upload(`${path}${this.data}`).catch(e => {
                     console.log("上传出错 ",e);
                     if (e.response.status == 413) {//文件过大，只写入文件名即可
-
+                        fs.mkdirSync(`tmp/${getDir(this.data)}`,{recursive:true});
                         // 尝试压缩后再次上传
-                        child_process.execSync(`mkdir -p "tmp/${getDir(this.data)}" && ffmpeg -i ${path}${this.data}  -quality 80 tmp/${this.data.replace('png', 'jpg')}`);
-
-                        if (fs.existsSync(`tmp/${this.data.replace('png', 'jpg')}`)) {
-                            this.upload(`tmp/${this.data.replace('png', 'jpg')}`).catch(ex => {
-                                if (ex.response.status == 413) {
-                                    console.log(`压缩后仍不能上传 ${path}${this.data} ${fs.statSync(path+this.data).size} ${fs.statSync('tmp/'+this.data.replace('png', 'jpg')).size}`)
-                                    this.writeFile(`${this.data.substring(this.data.lastIndexOf('/') + 1)}`);
-                                } else {
-                                    console.log(ex);
-                                    process.exit(127);
+                        const out = `tmp/${this.data.replace('png', 'jpg')}`;
+                        const _this = this;
+                        ffmpeg().input(this.data)
+                          .audioQuality(80)
+                          .on('end',()=>{
+                                if (fs.existsSync(out)) {
+                                    _this.upload(out).catch(ex => {
+                                        if (ex.response.status == 413) {
+                                            console.log(`压缩后仍不能上传 ${path}${_this.data} ${fs.statSync(path+_this.data).size} ${fs.statSync(out).size}`)
+                                            _this.writeFile(`${_this.data.substring(_this.data.lastIndexOf('/') + 1)}`);
+                                        } else {
+                                            console.log(ex);
+                                            process.exit(127);
+                                        }
+                                    })
+                                } else {//可能压缩失败
+                                    _this.writeFile(`${_this.data.substring(_this.data.lastIndexOf('/') + 1)}`);
                                 }
                             })
-                        } else {//可能压缩失败
-                            this.writeFile(`${this.data.substring(this.data.lastIndexOf('/') + 1)}`);
-                        }
-
+                          .on('error', function(err) {
+                                console.log('压缩错误 An error occurred: ' + err.message);
+                                _this.writeFile(`${this.data.substring(_this.data.lastIndexOf('/') + 1)}`);
+                            })
+                          .save(out)
+                        
                     } else {
                         console.log(e);
                         process.exit(127);

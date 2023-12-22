@@ -71,9 +71,9 @@ jobs:
         env:
           CSRF: ${{ secrets.CSRF }}
           SESSDATA: ${{ secrets.SESSDATA }}
+        # ubuntu 又出问题了,只能换种方式了
         run: |
           cd .github/workflows
-	# ubuntu 安装ffmpeg又出问题了,干脆换种方式
           npm i axios ffmpeg-static fluent-ffmpeg
           node list.js && echo $GITHUB_SHA > ../.sha
       - name: Push

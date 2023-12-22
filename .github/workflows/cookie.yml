@@ -22,7 +22,5 @@ jobs:
         env:
           CSRF: ${{ secrets.CSRF }}
           SESSDATA: ${{ secrets.SESSDATA }}
-        run: |
-          curl 'https://api.bilibili.com/x/vip/ads/materials?position=52&position=53&platform=pc&buvid=A3AD99A6-65D9-C8CE-AF4F-FC69BCF19F9447288infoc&mid=310871403' --compressed -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/119.0' -H 'Accept: application/json, text/plain, */*' -H 'Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2' -H 'Accept-Encoding: gzip, deflate, br' -H 'Referer: https://www.bilibili.com/' -H 'Origin: https://www.bilibili.com' -H 'DNT: 1' -H 'Connection: keep-alive' -H "Cookie: SESSDATA=$SESSDATA; bili_jct=$CSRF" -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-site' -H 'TE: trailers'
-
-
+        run: |  
+          curl 'https://api.bilibili.com/x/polymer/web-dynamic/v1/portal?web_location=333.1365' -s -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/119.0' -H 'Accept: */*' -H 'Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2' -H 'Accept-Encoding: gzip, deflate, br' -H 'Referer: https://t.bilibili.com/?spm_id_from=333.999.0.0' -H 'Origin: https://t.bilibili.com' -H 'DNT: 1' -H 'Connection: keep-alive' -H "Cookie: SESSDATA=$SESSDATA; bili_jct=$CSRF" -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-site' -H 'TE: trailers'

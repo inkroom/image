@@ -62,6 +62,7 @@ jobs:
             config.json
             README.md
             .github/**
+            list/**
       - name: Echo files
         run: |
           cp .github/outputs/added_files.txt add.list

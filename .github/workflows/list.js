@@ -1,9 +1,9 @@
 const fs = require('fs');
 const FormData = require('form-data');
 const axios = require('axios');
-const child_process = require('child_process');
 const pathToFfmpeg = require('ffmpeg-static')
 const ffmpeg = require('fluent-ffmpeg');
+
 
 ffmpeg.setFfmpegPath(pathToFfmpeg);
 
@@ -94,33 +94,41 @@ if (fs.existsSync(path + 'add.list')) {
                 return this.upload(`${path}${this.data}`).catch(e => {
                     console.log("上传出错 ",e);
                     if (e.response.status == 413) {//文件过大，只写入文件名即可
+                        
                         fs.mkdirSync(`tmp/${getDir(this.data)}`,{recursive:true});
                         // 尝试压缩后再次上传
                         const out = `tmp/${this.data.replace('png', 'jpg')}`;
-                        const _this = this;
-                        ffmpeg().input(this.data)
-                          .audioQuality(80)
-                          .on('end',()=>{
-                                if (fs.existsSync(out)) {
-                                    _this.upload(out).catch(ex => {
-                                        if (ex.response.status == 413) {
-                                            console.log(`压缩后仍不能上传 ${path}${_this.data} ${fs.statSync(path+_this.data).size} ${fs.statSync(out).size}`)
-                                            _this.writeFile(`${_this.data.substring(_this.data.lastIndexOf('/') + 1)}`);
-                                        } else {
-                                            console.log(ex);
-                                            process.exit(127);
-                                        }
-                                    })
-                                } else {//可能压缩失败
+                        console.log(`尝试压缩文件到 ${out}`);
+                        let _this = this;
+                        return new Promise((resolve,reject)=>{
+
+                                ffmpeg().input(_this.data)
+                                .audioQuality(80)
+                                .on('end',()=>{
+                                    if (fs.existsSync(out)) {
+                                        _this.upload(out).catch(ex => {
+                                            if (ex.response.status == 413) {
+                                                console.log(`压缩后仍不能上传 ${path}${_this.data} ${fs.statSync(path+_this.data).size} ${fs.statSync(out).size}`)
+                                                _this.writeFile(`${_this.data.substring(_this.data.lastIndexOf('/') + 1)}`);
+                                                resolve();
+                                            } else {
+                                                console.log(ex);
+                                                process.exit(127);
+                                            }
+                                        }).then(resolve)
+                                    } else {//可能压缩失败
+                                        _this.writeFile(`${_this.data.substring(_this.data.lastIndexOf('/') + 1)}`);
+                                        resolve();
+                                    }
+                                })
+                                .on('error', (err) => {
+                                    console.log('压缩错误 An error occurred: ' + err.message);
                                     _this.writeFile(`${_this.data.substring(_this.data.lastIndexOf('/') + 1)}`);
-                                }
-                            })
-                          .on('error', function(err) {
-                                console.log('压缩错误 An error occurred: ' + err.message);
-                                _this.writeFile(`${this.data.substring(_this.data.lastIndexOf('/') + 1)}`);
-                            })
-                          .save(out)
-                        
+                                    resolve();
+                                  })
+                                .save(out)
+                            
+                        });
                     } else {
                         console.log(e);
                         process.exit(127);

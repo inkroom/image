@@ -101,8 +101,7 @@ if (fs.existsSync(path + 'add.list')) {
                         console.log(`尝试压缩文件到 ${out}`);
                         let _this = this;
                         return new Promise((resolve,reject)=>{
-
-                                ffmpeg().input(_this.data)
+				ffmpeg().input(`${path}${_this.data}`)
                                 .audioQuality(80)
                                 .on('end',()=>{
                                     if (fs.existsSync(out)) {

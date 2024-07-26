@@ -31,3 +31,5 @@ jobs:
           else 
                 echo "ok"
           fi
+          # 之前遇到actions被disable的情况,可能是长时间没有访问过,加个访问试试
+          curl https://github.com/inkroom/image/actions

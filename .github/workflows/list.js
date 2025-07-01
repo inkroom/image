@@ -188,7 +188,7 @@ if (fs.existsSync(path + 'rename.list')) {
             if(dir==newDir){// 相同目录，替换
                 d[index] = d[index].replace(fss[0].replace(`${dir}/`, ''), fss[1].replace(`${dir}/`, ''));
             }else{// 不同目录删除，再往新目录头部追加
-                nd.unshift(d[index].replace(fss[0].replace(`${dir}/`, ''), fss[1].replace(`${dir}/`, '')));
+                nd.unshift(d[index].replace(fss[0].replace(`${dir}/`, ''), fss[1].replace(`${nd}/`, '')));
                 fs.writeFileSync(nlistPath, nd.join('\n').toString(), { encoding: 'utf-8' });
                 
                 d.splice(index, 1);

@@ -21,7 +21,7 @@ jobs:
   # This workflow contains a single job called "build"
   list:
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -89,7 +89,12 @@ jobs:
               git commit -m "Update List By Action Robot"
               git push
             fi
-          
+      - name: Alive
+        uses: entepotenz/keep-github-actions-alive-min-dependencies@v1
+        with: 
+          COMMIT_USER_NAME: Alive Action Rebot
+
+
         # uses: actions-x/commit@v6
         # with:
         #   email: github_temp@inkroom.cn

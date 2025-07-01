@@ -14,7 +14,7 @@ jobs:
   # This workflow contains a single job called "build"
   cookie:
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -22,14 +22,12 @@ jobs:
         env:
           CSRF: ${{ secrets.CSRF }}
           SESSDATA: ${{ secrets.SESSDATA }}
-        run: |  
+        run: |
           res=$(curl -s -i 'https://api.bilibili.com/x/polymer/web-dynamic/v1/portal?web_location=333.1365' --compressed -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/119.0' -H 'Accept: */*' -H 'Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2' -H 'Accept-Encoding: gzip, deflate, br' -H 'Referer: https://t.bilibili.com/?spm_id_from=333.1007.0.0' -H 'Origin: https://t.bilibili.com' -H 'DNT: 1' -H 'Connection: keep-alive' -H "Cookie: SESSDATA=$SESSDATA; bili_jct=$CSRF" -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-site' -H 'TE: trailers')
           code=$(echo "$res" | grep --color=never "bili-status-code" | tr -d '\r\n' )
           if [[ "[$code]" != "[bili-status-code: 0]" ]]; then
             echo "error"
             exit 127
           else 
-                echo "ok"
+            echo "ok"
           fi
-          # 之前遇到actions被disable的情况,可能是长时间没有访问过,加个访问试试
-          curl https://github.com/inkroom/image/actions

@@ -50,7 +50,7 @@ jobs:
       - name: List files
         id: changed-files
 # 新版本路径变化太大,没心情去适配
-        uses: tj-actions/changed-files@v35
+        uses: tj-actions/changed-files@v46
         with:
           base_sha: ${{ steps.get-base-sha.outputs.base_sha }}
           # fetch_depth: 1

@@ -5,6 +5,7 @@ const pathToFfmpeg = require('ffmpeg-static')
 const ffmpeg = require('fluent-ffmpeg');
 // 获取使用的key
 // https://github.com/xlzy520/picgo-plugin-bilibili?tab=readme-ov-file#%E8%8E%B7%E5%8F%96b%E7%AB%99sessdata
+// https://github.com/qg46/picgo-plugin-bilimallup
 
 ffmpeg.setFfmpegPath(pathToFfmpeg);
 
